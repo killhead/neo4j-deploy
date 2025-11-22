@@ -38,31 +38,8 @@ RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
-# Create startup script that runs both Neo4j and Nginx
-COPY <<'EOF' /startup.sh
-#!/bin/bash
-set -e
-
-# Start Neo4j in background
-echo "Starting Neo4j..."
-/startup/docker-entrypoint.sh neo4j &
-NEO4J_PID=$!
-
-# Wait for Neo4j to be ready
-echo "Waiting for Neo4j to start..."
-for i in {1..60}; do
-    if wget --quiet --tries=1 --spider http://localhost:7474/ 2>/dev/null; then
-        echo "Neo4j is ready!"
-        break
-    fi
-    sleep 2
-done
-
-# Start Nginx in foreground
-echo "Starting Nginx..."
-exec nginx -g "daemon off;"
-EOF
-
+# Copy startup script that runs both Neo4j and Nginx
+COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
 
 # Expose ports
