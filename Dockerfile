@@ -7,19 +7,25 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Create entrypoint script for certificate generation
-RUN mkdir -p /startup-scripts
-COPY generate-certificates-entrypoint.sh /startup-scripts/
-RUN chmod +x /startup-scripts/generate-certificates-entrypoint.sh
+# Create certificates directory with proper permissions
+RUN mkdir -p /var/lib/neo4j/certificates/https && \
+    chown -R neo4j:neo4j /var/lib/neo4j/certificates
 
-# Copy Neo4j configuration and set proper permissions
+# Generate SSL certificates at build time
+RUN openssl req -x509 -newkey rsa:4096 \
+    -keyout /var/lib/neo4j/certificates/https/private.key \
+    -out /var/lib/neo4j/certificates/https/public.crt \
+    -days 365 \
+    -nodes \
+    -subj "/C=US/ST=State/L=City/O=Organization/CN=localhost" && \
+    chown -R neo4j:neo4j /var/lib/neo4j/certificates && \
+    chmod 600 /var/lib/neo4j/certificates/https/private.key && \
+    chmod 644 /var/lib/neo4j/certificates/https/public.crt
+
+# Copy Neo4j configuration
 COPY neo4j.conf /var/lib/neo4j/conf/neo4j.conf
 RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
     chmod 644 /var/lib/neo4j/conf/neo4j.conf
-
-# Create certificates directory
-RUN mkdir -p /var/lib/neo4j/certificates/https && \
-    chown -R neo4j:neo4j /var/lib/neo4j/certificates
 
 # Switch back to neo4j user
 USER neo4j
@@ -27,7 +33,4 @@ USER neo4j
 # Expose ports
 EXPOSE 7473 7687
 
-# Use custom entrypoint that generates certificates if needed
-# Use default Neo4j command (empty, which triggers default server startup)
-ENTRYPOINT ["/startup-scripts/generate-certificates-entrypoint.sh"]
-CMD []
+# Use default Neo4j entrypoint - no need to override it
