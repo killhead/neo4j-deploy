@@ -12,8 +12,10 @@ RUN mkdir -p /startup-scripts
 COPY generate-certificates-entrypoint.sh /startup-scripts/
 RUN chmod +x /startup-scripts/generate-certificates-entrypoint.sh
 
-# Copy Neo4j configuration
+# Copy Neo4j configuration and set proper permissions
 COPY neo4j.conf /var/lib/neo4j/conf/neo4j.conf
+RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
+    chmod 644 /var/lib/neo4j/conf/neo4j.conf
 
 # Create certificates directory
 RUN mkdir -p /var/lib/neo4j/certificates/https && \
