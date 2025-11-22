@@ -31,5 +31,10 @@ if [ ! -f "${KEY_FILE}" ] || [ ! -f "${CERT_FILE}" ]; then
 fi
 
 # Execute original Neo4j entrypoint with all arguments
-exec /startup/docker-entrypoint.sh "$@"
+# If no arguments provided, pass empty string to avoid unbound variable error
+if [ $# -eq 0 ]; then
+    exec /startup/docker-entrypoint.sh ""
+else
+    exec /startup/docker-entrypoint.sh "$@"
+fi
 
