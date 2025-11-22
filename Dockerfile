@@ -1,9 +1,9 @@
 FROM neo4j:5.15-community
 
-# Install OpenSSL and Nginx
+# Install OpenSSL, Nginx and Supervisor
 USER root
 RUN apt-get update && \
-    apt-get install -y openssl nginx wget && \
+    apt-get install -y openssl nginx wget supervisor && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -38,12 +38,13 @@ RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
-# Create log directory for startup script
-RUN mkdir -p /var/log && chmod 777 /var/log
+# Create supervisor directories
+RUN mkdir -p /var/log/supervisor /var/run/supervisor && \
+    chmod 777 /var/log/supervisor /var/run/supervisor
 
-# Copy startup script that runs both Neo4j and Nginx
-COPY startup.sh /startup.sh
-RUN chmod +x /startup.sh
+# Copy supervisor configuration
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
 
 # Expose ports
 # 80 - HTTP (redirects to HTTPS, Railway will use this as main port)
@@ -55,5 +56,5 @@ EXPOSE 80 443 7687
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
-# Use custom startup script as entrypoint
-ENTRYPOINT ["/startup.sh"]
+# Use supervisor to manage both Neo4j and Nginx
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
