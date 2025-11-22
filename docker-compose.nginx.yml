@@ -1,0 +1,48 @@
+version: '3.8'
+
+# Alternative deployment with Nginx reverse proxy
+# This provides more control and is better for production environments
+
+services:
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: neo4j
+    environment:
+      - NEO4J_AUTH=neo4j/change_this_password
+      - NEO4J_PLUGINS=["apoc"]
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - neo4j-network
+    restart: unless-stopped
+    # Note: Neo4j runs on HTTP internally, Nginx handles HTTPS
+
+  nginx:
+    image: nginx:alpine
+    container_name: neo4j-nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./certificates:/etc/nginx/ssl:ro
+    depends_on:
+      - neo4j
+    networks:
+      - neo4j-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+
+networks:
+  neo4j-network:
+    driver: bridge
+

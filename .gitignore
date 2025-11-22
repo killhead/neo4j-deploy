@@ -1,0 +1,17 @@
+# Certificates (should not be committed)
+certificates/
+*.key
+*.crt
+*.pem
+
+# Neo4j data
+neo4j_data/
+neo4j_logs/
+
+# Backup files
+*.backup.*
+
+# Environment files
+.env
+.env.local
+

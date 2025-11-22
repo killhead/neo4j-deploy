@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  neo4j:
+    image: neo4j:5.15-community
+    container_name: neo4j-https
+    ports:
+      - "7473:7473"  # HTTPS
+      - "7687:7687"  # Bolt
+    environment:
+      - NEO4J_AUTH=neo4j/change_this_password
+      - NEO4J_PLUGINS=["apoc"]
+    volumes:
+      - ./neo4j.conf:/var/lib/neo4j/conf/neo4j.conf:ro
+      - ./certificates:/var/lib/neo4j/certificates:ro
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost:7473"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+

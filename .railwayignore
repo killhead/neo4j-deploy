@@ -1,0 +1,13 @@
+# Ignore certificates in Railway (they should be generated or provided via environment)
+certificates/
+*.key
+*.crt
+*.pem
+
+# Ignore local development files
+docker-compose.yml
+docker-compose.nginx.yml
+generate-certificates.sh
+QUICKSTART.md
+nginx/
+
