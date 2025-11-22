@@ -28,5 +28,6 @@ USER neo4j
 EXPOSE 7473 7687
 
 # Use custom entrypoint that generates certificates if needed
-# CMD will use default from base image
+# Use default Neo4j command (empty, which triggers default server startup)
 ENTRYPOINT ["/startup-scripts/generate-certificates-entrypoint.sh"]
+CMD []
