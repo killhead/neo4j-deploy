@@ -38,6 +38,9 @@ RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
 COPY nginx/nginx.conf /etc/nginx/nginx.conf
 RUN chmod 644 /etc/nginx/nginx.conf
 
+# Create log directory for startup script
+RUN mkdir -p /var/log && chmod 777 /var/log
+
 # Copy startup script that runs both Neo4j and Nginx
 COPY startup.sh /startup.sh
 RUN chmod +x /startup.sh
