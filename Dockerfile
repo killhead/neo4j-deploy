@@ -56,5 +56,6 @@ EXPOSE 80 443 7687
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
-# Use supervisor to manage both Neo4j and Nginx
+# Override Neo4j's default entrypoint and use supervisor
+ENTRYPOINT []
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
