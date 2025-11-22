@@ -46,6 +46,10 @@ RUN mkdir -p /var/log/supervisor /var/run/supervisor && \
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 RUN chmod 644 /etc/supervisor/conf.d/supervisord.conf
 
+# Copy test script
+COPY test-startup.sh /test-startup.sh
+RUN chmod +x /test-startup.sh
+
 # Expose ports
 # 80 - HTTP (redirects to HTTPS, Railway will use this as main port)
 # 443 - HTTPS (Neo4j UI)
@@ -57,5 +61,6 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
 # Override Neo4j's default entrypoint and use supervisor
-ENTRYPOINT []
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# First run test script to verify everything is in place
+ENTRYPOINT ["/bin/bash", "-c"]
+CMD ["/test-startup.sh && /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf"]
