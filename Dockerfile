@@ -36,4 +36,8 @@ USER neo4j
 # 7687 - Bolt (database connections)
 EXPOSE 7473 7474 7687
 
+# Healthcheck - check HTTP endpoint on port 7474
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+  CMD wget --quiet --tries=1 --spider http://localhost:7474/ || exit 1
+
 # Use default Neo4j entrypoint - no need to override it
