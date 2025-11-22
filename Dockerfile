@@ -31,6 +31,9 @@ RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
 USER neo4j
 
 # Expose ports
-EXPOSE 7473 7687
+# 7473 - HTTPS (secure web interface)
+# 7474 - HTTP (web interface, for compatibility)
+# 7687 - Bolt (database connections)
+EXPOSE 7473 7474 7687
 
 # Use default Neo4j entrypoint - no need to override it
