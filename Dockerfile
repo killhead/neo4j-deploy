@@ -52,5 +52,5 @@ EXPOSE 80 443 7687
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
 
-# Use custom startup script
-CMD ["/startup.sh"]
+# Use custom startup script as entrypoint
+ENTRYPOINT ["/startup.sh"]
