@@ -1,9 +1,9 @@
 FROM neo4j:5.15-community
 
-# Install OpenSSL, Nginx and Supervisor
+# Install OpenSSL, Nginx, Supervisor and gettext-base (for envsubst)
 USER root
 RUN apt-get update && \
-    apt-get install -y openssl nginx wget supervisor && \
+    apt-get install -y openssl nginx wget supervisor gettext-base && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -34,9 +34,9 @@ COPY neo4j.conf /var/lib/neo4j/conf/neo4j.conf
 RUN chown neo4j:neo4j /var/lib/neo4j/conf/neo4j.conf && \
     chmod 644 /var/lib/neo4j/conf/neo4j.conf
 
-# Copy Nginx configuration
-COPY nginx/nginx.conf /etc/nginx/nginx.conf
-RUN chmod 644 /etc/nginx/nginx.conf
+# Copy Nginx configuration template (will be processed with envsubst at runtime)
+COPY nginx/nginx.conf /etc/nginx/nginx.conf.template
+RUN chmod 644 /etc/nginx/nginx.conf.template
 
 # Create supervisor directories
 RUN mkdir -p /var/log/supervisor /var/run/supervisor && \
@@ -57,8 +57,9 @@ RUN chmod +x /test-startup.sh
 EXPOSE 80 443 7687
 
 # Healthcheck - check health endpoint through nginx (returns 200 OK)
+# Use PORT environment variable or default to 80
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/health || exit 1
+  CMD sh -c 'PORT=$${PORT:-80} && wget --quiet --tries=1 --spider http://localhost:$$PORT/health || exit 1'
 
 # Override Neo4j's default entrypoint and use supervisor
 # First run test script to verify everything is in place
