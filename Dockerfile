@@ -56,9 +56,9 @@ RUN chmod +x /test-startup.sh
 # 7687 - Bolt (database connections, exposed directly - Railway will handle port mapping)
 EXPOSE 80 443 7687
 
-# Healthcheck - check HTTP endpoint through nginx
+# Healthcheck - check health endpoint through nginx (returns 200 OK)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=90s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
+  CMD wget --quiet --tries=1 --spider http://localhost:80/health || exit 1
 
 # Override Neo4j's default entrypoint and use supervisor
 # First run test script to verify everything is in place
