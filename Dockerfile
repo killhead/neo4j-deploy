@@ -51,9 +51,9 @@ COPY test-startup.sh /test-startup.sh
 RUN chmod +x /test-startup.sh
 
 # Expose ports
-# 80 - HTTP (redirects to HTTPS, Railway will use this as main port)
-# 443 - HTTPS (Neo4j UI)
-# 7687 - Bolt (database connections, proxied through nginx stream)
+# 80 - HTTP (redirects to HTTPS, Railway will use this as main port for domain)
+# 443 - HTTPS (Neo4j UI through nginx)
+# 7687 - Bolt (database connections, exposed directly - Railway will handle port mapping)
 EXPOSE 80 443 7687
 
 # Healthcheck - check HTTP endpoint through nginx
