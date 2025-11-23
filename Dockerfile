@@ -1,9 +1,11 @@
 FROM neo4j:5.15-community
 
-# Install OpenSSL, Nginx, Supervisor and gettext-base (for envsubst)
+# Install OpenSSL, Nginx with stream module, Supervisor and gettext-base (for envsubst)
 USER root
 RUN apt-get update && \
     apt-get install -y openssl nginx wget supervisor gettext-base && \
+    # Verify nginx has stream module (it's included by default in Debian/Ubuntu nginx)
+    nginx -V 2>&1 | grep -q stream || echo "Warning: stream module may not be available" && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
